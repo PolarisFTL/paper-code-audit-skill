@@ -91,6 +91,27 @@ def plan_hash(items):
                                      separators=(',',':')).encode('utf-8')).hexdigest()
 
 
+def architecture_figure(audit):
+    """Only an explicitly selected, cropped main diagram belongs in the report.
+
+    Legacy unclassified figures often contain entire paper pages. They remain
+    valid audit data but are deliberately not used as report images.
+    """
+    primary=audit.get('architecture_figure')
+    if primary is not None:
+        if not isinstance(primary,dict):raise AuditError('architecture_figure must be an object')
+        if primary.get('cropped') is not True:
+            raise AuditError('The architecture figure must be cropped to the diagram (cropped=true)')
+        if type(primary.get('source_page')) is not int or primary['source_page']<1:
+            raise AuditError('architecture_figure.source_page must be a positive physical PDF page')
+        return primary
+    legacy=audit.get('figures',[])
+    if not isinstance(legacy,list):raise AuditError('Legacy figures must be a list')
+    selected=[f for f in legacy if isinstance(f,dict) and f.get('role')=='architecture' and f.get('cropped') is True]
+    if len(selected)>1:raise AuditError('Select only one cropped main architecture figure')
+    return selected[0] if selected else None
+
+
 def calculate(claims):
     """Unknowns remain in denominator. NA only removes genuinely inapplicable claims."""
     groups = []
@@ -243,11 +264,14 @@ def read_audit(audit_path):
             raise AuditError('Pipeline references an unknown claim id')
     for value in d.get('notes',[]):
         text(value,'note')
-    for fig in d.get('figures',[]):
+    selected_figure=architecture_figure(d)
+    for fig in [selected_figure] if selected_figure else []:
         path=within(audit_path.parent,fig.get('path'))
         if path.stat().st_size>12*1024*1024:
             raise AuditError('Figure exceeds the 12 MiB embed limit')
         text(fig.get('caption'),'figure.caption')
+        if 'source_page' in fig and (type(fig['source_page']) is not int or not 1<=fig['source_page']<=inputs['paper']['pages']):
+            raise AuditError('Architecture figure source_page is outside the physical PDF page range')
         data=path.read_bytes()
         if not (data.startswith(b'\x89PNG\r\n\x1a\n') or data.startswith(b'\xff\xd8\xff')):
             raise AuditError('Only actual PNG/JPEG figures may be embedded')

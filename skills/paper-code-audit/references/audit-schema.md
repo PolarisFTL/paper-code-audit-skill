@@ -2,6 +2,8 @@
 
 The agent performs the semantic review. Helpers validate provenance, source ranges and arithmetic; they cannot decide scientific equivalence automatically. Python 3.10+ is sufficient for scoring/rendering.
 
+The architecture-figure fields below extend schema `1.0` without changing its version. Existing `1.0` audits remain renderable; legacy paper-page images are not displayed.
+
 ## Input preparation
 
 ```text
@@ -58,9 +60,13 @@ The following illustrates the structure of **one** checklist item, not a complet
     {"title": "Two inputs", "detail": "Explain the actual flow.", "claim_ids": ["ARCH-01"]}
   ],
   "notes": ["Actual runtime and paper-metric reproduction were not verified."],
-  "figures": [
-    {"path": "figures/paper-figure.png", "caption": "Original paper Figure2, physical PDF page5; cropped only for reading."}
-  ]
+  "architecture_figure": {
+    "path": "figures/main-architecture.png",
+    "caption": "Original paper Figure 2: principal network architecture, physical PDF page 5.",
+    "source_page": 5,
+    "figure_label": "Figure 2",
+    "cropped": true
+  }
 }
 ```
 
@@ -73,11 +79,14 @@ The following illustrates the structure of **one** checklist item, not a complet
 - `status`: `matched`, `partial`, `mismatched`, `unknown`, `not_applicable`.
 - `paper.pages`: physical, one-based PDF pages; nonempty for applicable claims. Optional `section` and `equation` clarify references.
 - `critical`: flag indispensable behavior with an unresolved material conflict/unknown; it does not introduce hidden score weights.
-- `code`: exact one-based inclusive ranges, at most301 lines per excerpt. Choose narrow informative evidence. The renderer embeds actual file contents and checks their SHA256.
+- `code`: exact one-based inclusive ranges, at most301 lines per excerpt. Choose narrow informative evidence. The renderer embeds actual file contents and checks their SHA256. Each `note` explains the operation and its role in the active call path, connecting the excerpt to the paper requirement without repeating the verdict-level `analysis`. On desktop, the verdict, concise paper paraphrase, analysis and per-excerpt mappings appear on the left; the corresponding real source excerpts appear on the right. Narrow screens stack these panels.
 - `not_applicable`: also requires `na_reason`. Paper not disclosing a setting does not make it NA.
-- `figures`: optional actual PNG/JPEG artifacts only; embedded into the report. Do not use generated simulated method/experiment images as evidence.
-- `pipeline`, `notes`, `figures`: optional; avoid empty invented content just to fill sections.
+- `architecture_figure`: the preferred single report image. Use an actual PNG/JPEG crop of the paper's principal network architecture figure. Required fields are `path`, a nonempty `caption`, `source_page` (a positive integer within the known physical PDF page count), and `cropped: true`. `figure_label` is an optional nonempty string, such as `Figure 2`. The image path is relative to the audit JSON directory and cannot escape it. Preserve internal labels and legends; exclude surrounding paper prose and full-page renders. Never generate, redraw or substitute a diagram as paper evidence. The agent must inspect the crop against the actual PDF; `cropped: true` records that verification rather than proving it automatically.
+- `figures`: retained for compatibility with existing schema `1.0` audits. Unmarked figures, including old full-paper-page images, are not displayed. When `architecture_figure` is absent, a single entry explicitly containing both `role: "architecture"` and `cropped: true` may serve as the fallback architecture crop; more than one such fallback is rejected. The selected fallback must meet the actual-crop requirements above and have `path` and `caption`; `source_page`, when present, must be a positive integer within the known physical PDF page count. When `architecture_figure` is present, it takes precedence and legacy figures are ignored. Do not mark a whole paper page as cropped just to make it appear.
+- `pipeline`, `notes`, `architecture_figure`, `figures`: optional for compatibility; avoid invented content just to fill sections. New audits should supply the verified architecture crop when the paper provides a suitable figure. Without a preferred or explicitly marked legacy crop, the report shows a missing-architecture-figure notice asking for a crop and continues to render the evidence. Do not add full paper pages as a substitute.
 - Scores and per-claim weights are never supplied manually. Keep factual runtime evidence and logs in the job directory when authorized.
+
+Use full paper pages for internal reading and citation checks. Report paper evidence through physical page numbers, optional section/equation references and brief paraphrases. The report's only paper image is the selected architecture crop. Its upper-right light/dark switch remembers the reader's choice locally; no audit JSON setting is required.
 
 ## Freeze, score and render
 

@@ -4,6 +4,8 @@ Turn a **paper PDF + source directory or archive** into a readable, offline HTML
 
 **论文 PDF + 代码目录 / 压缩包 → 可视化 HTML 一致性报告。** 支持真实调用链、论文页码、源码行号、差异说明、评分和可展开证据。无需上传模型权重，也不会自动训练。
 
+The report shows the paper's main network architecture as one crop from the actual PDF, preserving its labels and legend without surrounding paper text. Each evidence item pairs the verdict, paper paraphrase and code mapping on the left with real source excerpts on the right; narrow screens stack the panels. A light/dark switch in the upper-right remembers the reader's choice. Full paper pages are read internally, not embedded in the report.
+
 ## Install
 
 Copy `skills/paper-code-audit` into your Codex skills directory. This package does not require a remote service or API key.

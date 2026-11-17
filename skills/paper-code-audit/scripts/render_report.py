@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 import html
 import json
 from pathlib import Path
-from audit_core import AuditError, read_audit, within
+from audit_core import AuditError, read_audit, within, architecture_figure
 
 SKILL=Path(__file__).resolve().parent.parent
 
@@ -25,8 +25,8 @@ def build(audit_path):
              'not_applicable':'N/A'})
     cards=[]
     for c in d['claims']:
-        p=c['paper'];ev=[]
-        for e in c.get('code',[]):
+        p=c['paper'];ev=[];mapping=[]
+        for index,e in enumerate(c.get('code',[]),1):
             start,end=e['start_line'],e['end_line']
             indexes=list(range(start-1,end))
             if len(indexes)>75:indexes=indexes[:45]+[None]+indexes[-20:]
@@ -34,24 +34,31 @@ def build(audit_path):
             for i in indexes:
                 if i is None:lines.append('      … omitted middle lines …')
                 else:lines.append(f'<span class="ln">{i+1:>5}</span> {esc(source_lines[e["path"]][i])}')
-            ev.append('<div class="evidence"><div class="code-title"><code>'+esc(e['path'])+
-                      f'</code><span>L{start}–{end}</span></div><p>'+esc(e.get('note',''))+
-                      '</p><pre><code>'+'\n'.join(lines)+'</code></pre></div>')
+            code_id='code-'+c['id']+'-'+str(index)
+            mapping.append('<li><a href="#'+code_id+'"><span class="map-number">'+str(index)+'</span>'+
+                           '<span class="map-note">'+esc(e.get('note') or ('对应实现片段' if zh else 'Implementation excerpt'))+
+                           '</span><code class="map-path">'+esc(e['path'])+'</code>'+
+                           f'<span class="map-lines">L{start}–{end}</span></a></li>')
+            ev.append('<div class="evidence" id="'+code_id+'" data-source-path="'+esc(e['path'])+
+                      f'" data-start-line="{start}" data-end-line="{end}"><div class="code-title">'+
+                      '<span class="excerpt-number">'+str(index)+'</span><code>'+esc(e['path'])+
+                      f'</code><span>L{start}–{end}</span></div><pre><code>'+'\n'.join(lines)+'</code></pre></div>')
         anchor='claim-'+c['id']
         paper_ref=('PDF '+', '.join(str(n) for n in p['pages'])+' · '+p.get('section','')+
                    (' · '+p['equation'] if p.get('equation') else '')).rstrip(' ·')
-        na=('<p class="meaning">N/A: '+esc(c['na_reason'])+'</p>') if c['status']=='not_applicable' else ''
+        na=('<p class="na-reason">N/A: '+esc(c['na_reason'])+'</p>') if c['status']=='not_applicable' else ''
         cards.append(f'<article class="audit-card" id="{anchor}" data-status="{c["status"]}" '
                      f'data-search="{esc(c["requirement"]+" "+c["analysis"]+" "+p["statement"])}">'
-                     '<div class="card-head"><span class="claim-id">'+esc(c['id'])+'</span><h3>'+esc(c['requirement'])+
+                     '<div class="card-head"><span class="claim-id card-id">'+esc(c['id'])+'</span><h3>'+esc(c['requirement'])+
                      '</h3><span class="badge '+c['status']+'">'+labels[c['status']]+'</span></div>'
-                     '<p class="meaning">'+esc(c['analysis'])+'</p>'+na+
-                     '<details><summary>论文与代码证据 / Paper &amp; code evidence</summary>'
-                     '<div class="comparison"><div><h4>论文 / Paper</h4><p>'+esc(p['statement'])+
-                     '</p><small>'+esc(paper_ref)+'</small></div><div><h4>判定 / Assessment</h4><p>'+
-                     esc(c['analysis'])+'</p><small>'+esc(c['category'])+'</small></div></div>'+
-                     ''.join(ev)+('' if ev else '<p class="meaning">No source excerpt was verified for this item.</p>')+
-                     '</details></article>')
+                     '<details open><summary>说明与对应源码 / Explanation &amp; source</summary>'+
+                     '<div class="match-grid"><div class="match-narrative"><h4>'+('论文要求 · 简明转述' if zh else 'Paper requirement · paraphrase')+
+                     '</h4><p class="paper-statement">'+esc(p['statement'])+'</p><p class="paper-ref">'+esc(paper_ref)+
+                     '</p><h4>'+('实现判断' if zh else 'Implementation assessment')+'</h4><p class="assessment">'+esc(c['analysis'])+
+                     '</p>'+na+('<h4>'+('右侧代码说明' if zh else 'Source excerpts on the right')+'</h4><ol class="code-map">'+''.join(mapping)+'</ol>' if mapping else '')+
+                     '</div><div class="match-code">'+(''.join(ev) if ev else '<p class="no-code no-evidence">'+
+                     ('此项暂无已核验的源码片段。' if zh else 'No verified source excerpt is available for this item.')+'</p>')+
+                     '</div></div></details></article>')
     categories=[]
     for x in score['categories']:
         label=x['label_zh'] if zh else x['label_en']
@@ -65,12 +72,16 @@ def build(audit_path):
         pipeline.append(f'<li><a href="{target}"><span class="step-number">{i:02}</span><h3>'+esc(node['title'])+
                         '</h3><p>'+esc(node['detail'])+'</p></a></li>')
     figures=[]
-    for fig in d.get('figures',[]):
+    selected_figure=architecture_figure(d)
+    for fig in [selected_figure] if selected_figure else []:
         file=within(Path(audit_path).resolve().parent,fig['path'])
         payload=file.read_bytes();mime='image/png' if payload.startswith(b'\x89PNG') else 'image/jpeg'
         url='data:'+mime+';base64,'+base64.b64encode(payload).decode('ascii')
-        figures.append('<figure class="paper-image"><img loading="lazy" src="'+url+'" alt="'+esc(fig['caption'])+
+        figures.append('<figure class="paper-image architecture-figure"><img loading="lazy" src="'+url+'" alt="'+esc(fig['caption'])+
                        '"><figcaption>'+esc(fig['caption'])+'</figcaption></figure>')
+    if not selected_figure:
+        figures.append('<p class="diagram-note">'+('未提供已裁剪的论文主网络图；报告不会展示原文整页。' if zh else
+                       'No cropped main network diagram was supplied; full paper pages are omitted.')+'</p>')
     common_notes=(['这是静态证据一致性评分，不是运行成功率、校准概率或论文指标复现结论。',
                    '未知项按0分保留分母；低分可能由证据不足导致，须结合覆盖率判断。',
                    '未知项全部匹配时的上限不是置信区间；它仅显示未验证项的评分影响。'] if zh else
