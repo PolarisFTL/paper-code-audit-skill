@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper–Code Audit"
+  short_description: "Compare paper methods with code and build scored HTML"
+  default_prompt: "Use $paper-code-audit to compare this paper PDF with this source directory or archive and produce an evidence-linked HTML consistency report."

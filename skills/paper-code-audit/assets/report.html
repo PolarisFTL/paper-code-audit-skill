@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="@@LANG@@">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="referrer" content="no-referrer">
+  <title>@@TITLE@@</title>
+  <style>
+    :root {
+      --ink: #192f34;
+      --muted: #5e7074;
+      --teal: #087f80;
+      --teal-dark: #075e61;
+      --teal-soft: #e8f5f3;
+      --paper: #ffffff;
+      --canvas: #f4f7f7;
+      --line: #dbe5e5;
+      --soft: #f7f9f9;
+      --amber: #936015;
+      --amber-soft: #fff5df;
+      --red: #a83936;
+      --red-soft: #fff0ee;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif; font-size: 15px; line-height: 1.7; }
+    a { color: var(--teal-dark); text-underline-offset: 3px; overflow-wrap: anywhere; }
+    a:hover { color: #043f42; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button, input, summary, a { -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid #35a6aa; outline-offset: 4px; }
+    [hidden] { display: none !important; }
+    .lang-en { display: none; }
+    html[lang="en"] .lang-en { display: inline; }
+    html[lang="en"] .lang-zh { display: none; }
+    .skip-link { position: fixed; z-index: 100; top: 12px; left: 12px; padding: 10px 16px; border-radius: 8px; color: white; background: var(--teal-dark); transform: translateY(-160%); }
+    .skip-link:focus { transform: translateY(0); }
+    .report-shell { width: min(1100px, calc(100% - 48px)); margin: 0 auto; }
+    .masthead { display: flex; align-items: flex-start; justify-content: space-between; gap: 28px; padding: 45px 0 26px; }
+    .eyebrow { display: flex; align-items: center; gap: 9px; margin: 0 0 13px; color: var(--teal-dark); font-size: 11px; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 23px; height: 3px; background: var(--teal); border-radius: 4px; }
+    h1 { max-width: 850px; margin: 0; font-size: clamp(25px, 3.4vw, 36px); line-height: 1.35; font-weight: 730; letter-spacing: -.025em; overflow-wrap: anywhere; text-wrap: balance; }
+    .report-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 16px; color: var(--muted); font-size: 12px; }
+    .meta-label { margin-right: 5px; color: #738589; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 13px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: white; line-height: 1.5; font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: background .15s, border-color .15s; }
+    .button:hover { border-color: #9dbbbc; background: #f0f7f6; }
+    .print-button { margin-top: 4px; }
+    .section-nav { position: sticky; top: 0; z-index: 10; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: rgba(244, 247, 247, .96); backdrop-filter: blur(12px); }
+    .section-nav .report-shell { display: flex; gap: 25px; overflow-x: auto; scrollbar-width: thin; }
+    .section-nav a { flex: 0 0 auto; padding: 13px 1px 12px; border-bottom: 2px solid transparent; color: var(--muted); font-size: 12px; font-weight: 650; text-decoration: none; }
+    .section-nav a:hover, .section-nav a[aria-current="location"] { border-bottom-color: var(--teal); color: var(--teal-dark); }
+    main { padding: 28px 0 48px; }
+    section { margin-bottom: 32px; scroll-margin-top: 86px; }
+    .panel { padding: 28px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); box-shadow: 0 2px 4px rgba(21, 56, 60, .015); }
+    .section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 0 0 16px; }
+    .section-heading h2 { margin: 0; font-size: 19px; font-weight: 720; letter-spacing: -.015em; }
+    .section-number { margin-right: 9px; color: var(--teal); font-size: 11px; font-weight: 750; font-variant-numeric: tabular-nums; letter-spacing: .04em; vertical-align: 2px; }
+    .section-note { color: var(--muted); font-size: 12px; }
+    .hero { overflow: hidden; position: relative; border-top: 4px solid var(--teal); }
+    .hero-heading { margin: 0 0 20px; color: var(--muted); font-size: 12px; font-weight: 650; letter-spacing: .04em; }
+    .score-row { display: flex; align-items: center; gap: 28px; }
+    .score { display: flex; flex: 0 0 auto; align-items: baseline; gap: 2px; color: var(--teal-dark); font-variant-numeric: tabular-nums; letter-spacing: -.065em; line-height: 1; }
+    .score-value { font-size: clamp(64px, 9vw, 106px); font-weight: 760; }
+    .score-unit { margin-left: 4px; font-size: 36px; font-weight: 550; letter-spacing: -.04em; }
+    .score-context { padding: 4px 0; }
+    .grade { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 6px; font-size: 17px; font-weight: 750; }
+    .grade::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .grade.high { color: var(--teal-dark); background: var(--teal-soft); }
+    .grade.medium { color: var(--amber); background: var(--amber-soft); }
+    .grade.low { color: var(--red); background: var(--red-soft); }
+    .static-warning { margin: 11px 0 0; color: var(--ink); font-size: 13px; font-weight: 650; }
+    .score-caption { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .critical-block { margin: 22px 0 0; padding: 14px 17px; border: 1px solid #e8b9ac; border-left: 4px solid var(--red); border-radius: 8px; color: #7d302a; background: #fff4ef; font-size: 13px; }
+    .critical-block:empty { display: none; }
+    .critical-block > :first-child { margin-top: 0; }
+    .critical-block > :last-child { margin-bottom: 0; }
+    .critical-block h2, .critical-block h3, .critical-block h4 { margin: 0 0 6px; font-size: 14px; }
+    .critical-block p { margin: 5px 0; }
+    .hero-summary { margin: 23px 0 20px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.85; white-space: pre-line; overflow-wrap: anywhere; }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .metric { display: flex; flex-direction: column; gap: 5px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); }
+    .metric-label { color: var(--muted); font-size: 12px; font-weight: 650; }
+    .metric-value { color: var(--ink); font-size: 25px; font-weight: 730; font-variant-numeric: tabular-nums; letter-spacing: -.025em; line-height: 1.3; }
+    .metric-detail { color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .counts { margin: 16px 0 0; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .plan-note { margin: 14px 0 0; padding: 11px 14px; border-radius: 7px; color: var(--teal-dark); background: var(--teal-soft); font-size: 12px; white-space: pre-line; }
+    .plan-note:empty { display: none; }
+    .pipeline { display: grid; gap: 13px; }
+    .pipeline ol, .pipeline .pipeline-grid, .pipeline .pipeline-stages { display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 13px; margin: 0; padding: 0; list-style: none; }
+    .pipeline > .pipeline-step, .pipeline > .pipeline-stage, .pipeline > .stage, .pipeline > .step, .pipeline li { position: relative; padding: 17px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); }
+    .pipeline h3, .pipeline h4 { margin: 0 0 7px; color: var(--teal-dark); font-size: 13px; }
+    .pipeline p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+    .pipeline .step-number, .pipeline .stage-number { display: inline-block; margin-bottom: 9px; color: var(--teal); font-size: 11px; font-weight: 750; }
+    .pipeline .pipeline-arrow { color: var(--teal); text-align: center; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th { padding: 12px 15px; color: var(--muted); background: var(--soft); font-size: 11px; font-weight: 700; white-space: nowrap; }
+    td { padding: 13px 15px; border-top: 1px solid var(--line); vertical-align: top; font-variant-numeric: tabular-nums; }
+    tbody td:first-child { font-weight: 650; }
+    tbody tr:hover { background: #fbfdfc; }
+    .score-bar, .mini-bar, .bar { overflow: hidden; width: 90px; height: 5px; margin-top: 6px; border-radius: 4px; background: #e4edec; }
+    .score-bar > span, .mini-bar > span, .bar > span { display: block; height: 100%; border-radius: inherit; background: var(--teal); }
+    .formula { margin-top: 20px; padding: 17px 19px; border-left: 3px solid var(--teal); border-radius: 0 8px 8px 0; background: var(--soft); color: var(--muted); font-size: 12px; }
+    .formula h3 { margin: 0 0 9px; color: var(--ink); font-size: 13px; }
+    .formula p { margin: 7px 0; }
+    .formula .equation { color: var(--teal-dark); font-weight: 650; }
+    .formula code { color: inherit; background: #eaf0ef; }
+    .thresholds { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 13px; font-size: 11px; }
+    .thresholds span { display: inline-flex; align-items: center; gap: 6px; }
+    .dot { display: inline-block; flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; background: var(--teal); }
+    .dot.medium { background: #b68122; }
+    .dot.low { background: #c05c50; }
+    .evidence-intro { margin: -6px 0 15px; color: var(--muted); font-size: 12px; }
+    .evidence-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 13px; margin-bottom: 15px; }
+    .search-wrap { position: relative; flex: 1 1 260px; max-width: 440px; }
+    .search-icon { position: absolute; top: 50%; left: 13px; width: 15px; height: 15px; color: #71878b; transform: translateY(-50%); pointer-events: none; }
+    .search-input { width: 100%; padding: 10px 13px 10px 38px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: white; font-size: 12px; }
+    .search-input::placeholder { color: #75868a; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+    .filter { padding: 5px 11px; border: 1px solid var(--line); border-radius: 6px; color: var(--muted); background: white; font-size: 11px; font-weight: 650; }
+    .filter:hover { border-color: #96b7b8; }
+    .filter[aria-pressed="true"] { border-color: var(--teal); color: var(--teal-dark); background: var(--teal-soft); box-shadow: 0 0 0 1px var(--teal); }
+    .results-line { min-height: 22px; margin: 0 0 12px; color: var(--muted); font-size: 11px; }
+    .audit-cards { display: grid; gap: 13px; }
+    .audit-card { overflow: hidden; min-width: 0; border: 1px solid var(--line); border-left: 3px solid #a7b9bb; border-radius: 11px; background: white; }
+    .audit-card[data-status="matched"] { border-left-color: var(--teal); }
+    .audit-card[data-status="partial"] { border-left-color: #c29032; }
+    .audit-card[data-status="mismatched"] { border-left-color: #c26055; }
+    .audit-card[data-status="unknown"] { border-left-color: #8d9ca3; }
+    .audit-card[data-status="not_applicable"] { border-left-color: #bdc8ca; }
+    .card-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 18px; padding: 18px 20px 11px; }
+    .card-head h3, .card-head h4 { flex: 1 1 250px; margin: 0; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+    .card-head .card-id, .card-head .category, .card-category { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: .04em; }
+    .card-head .card-id { margin-right: 8px; }
+    .badge { display: inline-flex; align-items: center; flex: 0 0 auto; gap: 5px; padding: 3px 8px; border: 1px solid #dbe4e5; border-radius: 5px; color: #64787d; background: #f1f5f5; font-size: 10px; font-weight: 700; line-height: 1.6; }
+    [data-status="matched"] .badge, .badge.matched, .badge.high { border-color: #b5ded7; color: var(--teal-dark); background: var(--teal-soft); }
+    [data-status="partial"] .badge, .badge.partial, .badge.medium { border-color: #ead49b; color: var(--amber); background: var(--amber-soft); }
+    [data-status="mismatched"] .badge, .badge.mismatched, .badge.low { border-color: #efc6bf; color: var(--red); background: var(--red-soft); }
+    [data-status="not_applicable"] .badge, .badge.not_applicable { color: #707d81; background: #f5f6f6; }
+    .meaning { margin: 0; padding: 0 20px 15px; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .meaning h4 { margin: 0 0 4px; color: var(--ink); font-size: 12px; }
+    .meaning p { margin: 5px 0; }
+    .comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; margin: 0 20px 15px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); }
+    .comparison > * { min-width: 0; margin: 0; padding: 13px 15px; overflow-wrap: anywhere; }
+    .comparison > * + * { border-left: 1px solid var(--line); }
+    .comparison h4, .comparison h5, .comparison .label { display: block; margin: 0 0 6px; color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .035em; }
+    .comparison p { margin: 4px 0; font-size: 12px; }
+    details { min-width: 0; }
+    .audit-card > details, .audit-card > .evidence { border-top: 1px solid var(--line); }
+    summary { position: relative; padding: 11px 20px; color: var(--teal-dark); background: #fbfdfc; font-size: 11px; font-weight: 650; cursor: pointer; }
+    summary:hover { background: #f0f7f6; }
+    details[open] > summary { border-bottom: 1px solid var(--line); }
+    .evidence { min-width: 0; font-size: 12px; }
+    .evidence > :not(summary), details > .evidence { margin: 14px 20px; }
+    .evidence p { color: var(--muted); overflow-wrap: anywhere; }
+    .evidence h4 { margin: 14px 0 8px; color: var(--ink); font-size: 12px; }
+    .evidence .paper-ref, .paper-ref { color: var(--muted); font-size: 11px; }
+    .code-title { display: block; margin: 14px 0 0; padding: 8px 12px; border: 1px solid #dce6e6; border-bottom: 0; border-radius: 7px 7px 0 0; color: #4b656a; background: #edf3f3; font: 11px/1.6 ui-monospace, "Cascadia Code", Consolas, monospace; overflow-wrap: anywhere; }
+    pre { overflow: auto; max-width: 100%; margin: 10px 0 14px; padding: 13px 15px; border: 1px solid #dce6e6; border-radius: 7px; color: #274950; background: #f4f7f7; font: 11px/1.85 ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace; tab-size: 4; }
+    .code-title + pre { margin-top: 0; border-radius: 0 0 7px 7px; }
+    code { padding: 1px 4px; border-radius: 3px; color: #316267; background: #eef3f3; font: .9em/1.7 ui-monospace, "Cascadia Code", Consolas, monospace; overflow-wrap: anywhere; }
+    pre code { padding: 0; color: inherit; background: transparent; font: inherit; overflow-wrap: normal; }
+    .ln { display: inline-block; min-width: 3em; margin-right: 1em; border-right: 1px solid #d8e3e3; color: #8b9fa3; user-select: none; }
+    .paper-image { display: block; max-width: 100%; height: auto; margin: 12px auto; border: 1px solid var(--line); border-radius: 5px; background: white; }
+    .paper-image img { display: block; width: 100%; max-width: 100%; height: auto; }
+    figure { max-width: 100%; margin: 12px 0; }
+    figcaption { margin-top: 7px; color: var(--muted); font-size: 11px; }
+    .empty-state { margin: 16px 0 0; padding: 30px 20px; border: 1px dashed #c6d7d7; border-radius: 10px; color: var(--muted); background: white; text-align: center; font-size: 13px; }
+    .limits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .limits-grid h3 { margin: 0 0 9px; font-size: 13px; }
+    .limits-grid p, .limits-grid ul { margin: 0; color: var(--muted); font-size: 12px; }
+    .limits-grid ul, .notes ul { padding-left: 19px; }
+    .limits-grid li, .notes li { margin: 7px 0; padding-left: 2px; }
+    .notes { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .notes > ul { margin: 0; }
+    .notes:empty { display: none; }
+    .sources { color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+    .sources > :first-child { margin-top: 0; }
+    .sources > :last-child { margin-bottom: 0; }
+    .sources h3 { margin: 18px 0 8px; color: var(--ink); font-size: 13px; }
+    .sources dl { display: grid; grid-template-columns: minmax(105px, 155px) minmax(0, 1fr); gap: 8px 20px; margin: 0; }
+    .sources dt { font-weight: 650; }
+    .sources dd { margin: 0; }
+    .sources code { white-space: normal; }
+    .sources table { font-size: 11px; }
+    .report-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 21px 0 36px; border-top: 1px solid var(--line); color: #718489; font-size: 11px; }
+    .back-to-top { position: fixed; z-index: 12; right: 24px; bottom: 24px; display: inline-flex; align-items: center; gap: 6px; padding: 9px 12px; border: 1px solid #c8dbda; border-radius: 8px; color: var(--teal-dark); background: rgba(255,255,255,.96); box-shadow: 0 4px 16px #173f4312; font-size: 11px; font-weight: 650; text-decoration: none; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    @media (min-width: 850px) {
+      .pipeline:has(> .pipeline-step), .pipeline:has(> .pipeline-stage), .pipeline:has(> .stage), .pipeline:has(> .step) { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+    }
+    @media (max-width: 700px) {
+      html { scroll-padding-top: 72px; }
+      .report-shell { width: min(100% - 28px, 1100px); }
+      .masthead { gap: 14px; padding: 27px 0 22px; }
+      .eyebrow { font-size: 9px; letter-spacing: .1em; }
+      .print-button { padding: 7px 9px; }
+      .print-button .button-label { display: none; }
+      .section-nav .report-shell { gap: 23px; }
+      .section-nav a { padding: 12px 0 10px; font-size: 11px; }
+      main { padding-top: 20px; }
+      section { margin-bottom: 25px; }
+      .panel { padding: 21px 18px; border-radius: 12px; }
+      .score-row { flex-wrap: wrap; align-items: flex-start; gap: 13px 20px; }
+      .score-value { font-size: 75px; }
+      .score-unit { font-size: 29px; }
+      .score-context { flex: 1 1 220px; }
+      .grade { font-size: 15px; }
+      .metric { padding: 13px; }
+      .metric-value { font-size: 22px; }
+      .section-heading { align-items: flex-start; gap: 10px; }
+      .section-heading h2 { font-size: 17px; }
+      .section-note { max-width: 40%; font-size: 10px; text-align: right; }
+      th, td { padding: 11px 12px; }
+      .search-wrap { max-width: none; }
+      .card-head { padding: 16px 16px 9px; }
+      .meaning { padding: 0 16px 13px; }
+      .comparison { grid-template-columns: 1fr; margin: 0 16px 13px; }
+      .comparison > * + * { border-top: 1px solid var(--line); border-left: 0; }
+      summary { padding: 11px 16px; }
+      .evidence > :not(summary), details > .evidence { margin-left: 16px; margin-right: 16px; }
+      .limits-grid { grid-template-columns: 1fr; gap: 20px; }
+      .sources dl { grid-template-columns: 1fr; gap: 3px; }
+      .sources dd { margin-bottom: 10px; }
+      .back-to-top { right: 14px; bottom: 14px; padding: 8px 10px; }
+    }
+    @media (max-width: 390px) {
+      .metric-grid { grid-template-columns: 1fr; }
+      .score-value { font-size: 66px; }
+      .report-meta { gap: 5px 12px; }
+      .toolbar-actions { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
+    @media print {
+      @page { margin: 15mm; }
+      html, body { background: white; font-size: 10pt; }
+      .report-shell { width: 100%; max-width: none; }
+      .masthead { padding: 0 0 18px; }
+      .section-nav, .print-button, .back-to-top, .evidence-toolbar, .filters, .results-line, .empty-state, .skip-link { display: none !important; }
+      main { padding-top: 0; padding-bottom: 0; }
+      section { margin-bottom: 20px; }
+      .panel { padding: 18px; box-shadow: none; }
+      .score-value { font-size: 70px; }
+      .audit-card { break-inside: avoid; }
+      .audit-card[hidden] { display: block !important; }
+      .table-wrap, pre { overflow: visible; }
+      pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 8pt; }
+      .sources, .notes { font-size: 9pt; }
+      h2, h3, h4, summary { break-after: avoid; }
+      .report-footer { padding-bottom: 0; }
+      a { color: var(--ink); }
+    }
+  </style>
+</head>
+<body id="top">
+  <a class="skip-link" href="#summary"><span class="lang-zh">跳到报告正文</span><span class="lang-en">Skip to report</span></a>
+  <header class="report-shell masthead">
+    <div>
+      <p class="eyebrow">Paper × Code · Static Consistency Audit</p>
+      <h1>@@TITLE@@</h1>
+      <div class="report-meta">
+        <span><span class="meta-label"><span class="lang-zh">生成日期</span><span class="lang-en">Generated</span></span>@@DATE@@</span>
+        <span><span class="lang-zh">论文 PDF · 代码 · 配置 · 静态证据</span><span class="lang-en">Paper PDF · code · configuration · static evidence</span></span>
+      </div>
+    </div>
+    <button class="button print-button" id="print-report" type="button" aria-label="Print / 打印">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 8V3h10v5M7 17H4V9h16v8h-3M7 14h10v7H7z"/><path d="M16 11h1"/></svg>
+      <span class="button-label"><span class="lang-zh">打印 / PDF</span><span class="lang-en">Print / PDF</span></span>
+    </button>
+  </header>
+
+  <nav class="section-nav" aria-label="Report sections / 报告导航">
+    <div class="report-shell">
+      <a href="#summary"><span class="lang-zh">结论总览</span><span class="lang-en">Summary</span></a>
+      <a href="#pipeline"><span class="lang-zh">方法流程</span><span class="lang-en">Pipeline</span></a>
+      <a href="#scoring"><span class="lang-zh">分类评分</span><span class="lang-en">Scoring</span></a>
+      <a href="#evidence"><span class="lang-zh">逐项证据</span><span class="lang-en">Evidence</span></a>
+      <a href="#limits"><span class="lang-zh">边界与待核实</span><span class="lang-en">Limits</span></a>
+      <a href="#sources"><span class="lang-zh">来源与溯源</span><span class="lang-en">Sources</span></a>
+    </div>
+  </nav>
+
+  <main class="report-shell">
+    <section id="summary" class="panel hero" aria-labelledby="summary-title">
+      <h2 class="hero-heading" id="summary-title"><span class="lang-zh">静态一致性评分</span><span class="lang-en">Static consistency score</span></h2>
+      <div class="score-row">
+        <div class="score"><span class="score-value">@@SCORE@@</span><span class="score-unit">%</span></div>
+        <div class="score-context">
+          <div class="grade @@GRADE_CLASS@@">@@GRADE@@</div>
+          <p class="static-warning"><span class="lang-zh">静态评分 ≠ 已成功复现</span><span class="lang-en">A static score ≠ a successful reproduction</span></p>
+          <p class="score-caption"><span class="lang-zh">衡量论文与可检查实现的一致程度；不是成功概率。</span><span class="lang-en">Measures agreement with inspectable implementation; not a probability of success.</span></p>
+        </div>
+      </div>
+      <div class="critical-block" role="note">@@CRITICAL@@</div>
+      <p class="hero-summary">@@SUMMARY@@</p>
+      <div class="metric-grid">
+        <div class="metric">
+          <span class="metric-label"><span class="lang-zh">证据覆盖率</span><span class="lang-en">Evidence coverage</span></span>
+          <strong class="metric-value">@@COVERAGE@@%</strong>
+          <span class="metric-detail"><span class="lang-zh">已能判定为一致、部分一致或不一致的有效条目占比</span><span class="lang-en">Share of applicable items assessed as matched, partial, or mismatched</span></span>
+        </div>
+        <div class="metric">
+          <span class="metric-label"><span class="lang-zh">未知项全部一致时的评分上限</span><span class="lang-en">Upper bound if all unknowns match</span></span>
+          <strong class="metric-value">@@UNKNOWN_UPPER@@%</strong>
+          <span class="metric-detail"><span class="lang-zh">只作敏感性参考；未知项尚未获得一致证据</span><span class="lang-en">A sensitivity reference only; unknown items still lack confirming evidence</span></span>
+        </div>
+      </div>
+      <p class="counts">@@COUNTS@@</p>
+      <p class="plan-note">@@PLAN_NOTE@@</p>
+    </section>
+
+    <section id="pipeline" aria-labelledby="pipeline-title">
+      <div class="section-heading">
+        <h2 id="pipeline-title"><span class="section-number">01</span><span class="lang-zh">方法与实现流程</span><span class="lang-en">Method & implementation pipeline</span></h2>
+        <span class="section-note"><span class="lang-zh">从论文主张追到实际调用</span><span class="lang-en">Trace claims to actual calls</span></span>
+      </div>
+      <div class="panel"><div class="pipeline">@@PIPELINE@@</div></div>
+    </section>
+
+    <section id="scoring" aria-labelledby="scoring-title">
+      <div class="section-heading">
+        <h2 id="scoring-title"><span class="section-number">02</span><span class="lang-zh">六类一致性评分</span><span class="lang-en">Six-category consistency scoring</span></h2>
+        <span class="section-note"><span class="lang-zh">权重与未知项均公开</span><span class="lang-en">Explicit weights & unknowns</span></span>
+      </div>
+      <div class="panel">
+        <div class="table-wrap">
+          <table>
+            <caption class="sr-only"><span class="lang-zh">六类检查的权重、一致性分数、证据覆盖率和未知条目</span><span class="lang-en">Category weights, consistency, coverage, and unknown items</span></caption>
+            <thead><tr>
+              <th scope="col"><span class="lang-zh">审查类别</span><span class="lang-en">Category</span></th>
+              <th scope="col"><span class="lang-zh">权重</span><span class="lang-en">Weight</span></th>
+              <th scope="col"><span class="lang-zh">一致性</span><span class="lang-en">Consistency</span></th>
+              <th scope="col"><span class="lang-zh">证据覆盖率</span><span class="lang-en">Coverage</span></th>
+              <th scope="col"><span class="lang-zh">未知条目</span><span class="lang-en">Unknowns</span></th>
+            </tr></thead>
+            <tbody>@@CATEGORY_ROWS@@</tbody>
+          </table>
+        </div>
+        <div class="formula">
+          <h3><span class="lang-zh">评分如何计算</span><span class="lang-en">How the score is calculated</span></h3>
+          <p><span class="lang-zh">条目得分：一致 <code>1</code>、部分一致 <code>0.5</code>、不一致 <code>0</code>、未知 <code>0</code>。未知保留在分母中；只有具备理由和证据的不适用（NA）条目才从分母排除。每个类别内部的有效条目等权。</span><span class="lang-en">Item values: matched <code>1</code>, partial <code>0.5</code>, mismatched <code>0</code>, unknown <code>0</code>. Unknowns remain in the denominator. Only justified, evidenced not-applicable (NA) items are excluded. Applicable items have equal weight within each category.</span></p>
+          <p class="equation"><span class="lang-zh">类别一致性 = 100 × 条目得分之和 ÷ 有效条目数<br>总分 = Σ（有效类别权重 × 类别一致性）÷ Σ 有效类别权重</span><span class="lang-en">Category consistency = 100 × sum of item values ÷ applicable item count<br>Overall score = Σ (active category weight × category consistency) ÷ Σ active category weights</span></p>
+          <p><span class="lang-zh">六类基础权重依次为 25 / 25 / 15 / 15 / 10 / 10。全为 NA 的类别不参与加权，其余类别权重归一化。类别覆盖率 = 已判定条目数 ÷ 有效条目数，总覆盖率按同一类别权重加权；未知上限仅将未知项暂按 1 计算，不改变其他状态。</span><span class="lang-en">Base category weights are 25 / 25 / 15 / 15 / 10 / 10 in table order. Entirely NA categories are excluded and remaining weights are normalized. Category coverage = assessed items ÷ applicable items; overall coverage uses the same category weights. The unknown upper bound changes only unknown item values to 1.</span></p>
+          <p><span class="lang-zh">总分四舍五入至两位小数后分档。分档是静态检查的解释规则，未经校准为复现成功概率；关键缺失或错误仍须单独阅读。</span><span class="lang-en">Grades use the overall score rounded to two decimals. These thresholds interpret a static audit and are not calibrated reproduction probabilities. Read critical gaps or errors separately.</span></p>
+          <div class="thresholds">
+            <span><i class="dot" aria-hidden="true"></i><span class="lang-zh">&gt; 80% · 可复现性强</span><span class="lang-en">&gt; 80% · Strong reproducibility</span></span>
+            <span><i class="dot medium" aria-hidden="true"></i><span class="lang-zh">50–80% · 中等</span><span class="lang-en">50–80% · Moderate</span></span>
+            <span><i class="dot low" aria-hidden="true"></i><span class="lang-zh">&lt; 50% · 可能无法正常复现</span><span class="lang-en">&lt; 50% · May not reproduce correctly</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="evidence" aria-labelledby="evidence-title">
+      <div class="section-heading">
+        <h2 id="evidence-title"><span class="section-number">03</span><span class="lang-zh">逐项主张与源码证据</span><span class="lang-en">Claims & source evidence</span></h2>
+        <span class="section-note"><span class="lang-zh">可筛选 · 可搜索 · 可展开</span><span class="lang-en">Filter · search · expand</span></span>
+      </div>
+      <p class="evidence-intro"><span class="lang-zh">每个结论应关联论文位置、实现位置和可核查的差异解释。展开卡片查看证据。</span><span class="lang-en">Each finding should connect a paper location, an implementation location, and a checkable explanation. Expand cards to inspect evidence.</span></p>
+      <div class="evidence-toolbar">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
+          <label class="sr-only" for="evidence-search"><span class="lang-zh">搜索证据</span><span class="lang-en">Search evidence</span></label>
+          <input id="evidence-search" class="search-input" type="search" placeholder="搜索主张、文件、关键词… / Search evidence…" autocomplete="off" spellcheck="false" aria-controls="audit-cards">
+        </div>
+        <div class="toolbar-actions">
+          <button id="expand-all" class="button" type="button"><span class="lang-zh">展开全部证据</span><span class="lang-en">Expand all evidence</span></button>
+          <button id="collapse-all" class="button" type="button"><span class="lang-zh">收起全部证据</span><span class="lang-en">Collapse all evidence</span></button>
+        </div>
+      </div>
+      <div class="filters" role="group" aria-label="Filter by status / 按状态筛选">
+        <button class="filter" type="button" data-status-filter="all" aria-pressed="true"><span class="lang-zh">全部</span><span class="lang-en">All</span></button>
+        <button class="filter" type="button" data-status-filter="matched" aria-pressed="false"><span class="lang-zh">一致</span><span class="lang-en">Matched</span></button>
+        <button class="filter" type="button" data-status-filter="partial" aria-pressed="false"><span class="lang-zh">部分一致</span><span class="lang-en">Partial</span></button>
+        <button class="filter" type="button" data-status-filter="mismatched" aria-pressed="false"><span class="lang-zh">不一致</span><span class="lang-en">Mismatched</span></button>
+        <button class="filter" type="button" data-status-filter="unknown" aria-pressed="false"><span class="lang-zh">未知</span><span class="lang-en">Unknown</span></button>
+        <button class="filter" type="button" data-status-filter="not_applicable" aria-pressed="false"><span class="lang-zh">不适用</span><span class="lang-en">NA</span></button>
+      </div>
+      <p class="results-line" id="results-line" role="status" aria-live="polite" aria-atomic="true"></p>
+      <div class="audit-cards" id="audit-cards">@@CARDS@@</div>
+      <p class="empty-state" id="no-results" hidden><span class="lang-zh">没有符合条件的条目。尝试其他关键词或选择“全部”。</span><span class="lang-en">No items match. Try another search or select “All”.</span></p>
+      <noscript><p class="evidence-intro">筛选与批量展开需要 JavaScript；所有证据仍可逐项阅读。 / Filters and bulk controls require JavaScript; all evidence remains individually readable.</p></noscript>
+    </section>
+
+    <section id="limits" aria-labelledby="limits-title">
+      <div class="section-heading">
+        <h2 id="limits-title"><span class="section-number">04</span><span class="lang-zh">检查边界与待核实事项</span><span class="lang-en">Limits & open questions</span></h2>
+      </div>
+      <div class="panel limits-grid">
+        <div>
+          <h3><span class="lang-zh">如何理解这份报告</span><span class="lang-en">How to read this report</span></h3>
+          <p><span class="lang-zh">静态一致性只能反映本次可获取材料中的对应关系。它不能单独证明训练收敛、指标达标、环境可安装或完整实验可运行。未知意味着证据不足；“代码存在”也不自动证明该代码在目标流程中被调用。</span><span class="lang-en">Static consistency describes relationships in the materials available for this audit. It alone cannot establish training convergence, reported metrics, environment installability, or an executable full experiment. Unknown means insufficient evidence; existing code does not automatically prove use in the target pipeline.</span></p>
+        </div>
+        <div>
+          <h3><span class="lang-zh">本次审查记录</span><span class="lang-en">Audit notes</span></h3>
+          <div class="notes">@@NOTES@@</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources" aria-labelledby="sources-title">
+      <div class="section-heading">
+        <h2 id="sources-title"><span class="section-number">05</span><span class="lang-zh">材料来源与版本溯源</span><span class="lang-en">Sources & provenance</span></h2>
+        <span class="section-note"><span class="lang-zh">结论受材料版本约束</span><span class="lang-en">Findings are version-specific</span></span>
+      </div>
+      <div class="panel sources">@@PROVENANCE@@</div>
+    </section>
+  </main>
+
+  <footer class="report-shell report-footer">
+    <span>Paper × Code · <span class="lang-zh">静态一致性审查</span><span class="lang-en">Static consistency audit</span></span>
+    <span><span class="lang-zh">证据优先 · 未知显式保留 · 评分可追溯</span><span class="lang-en">Evidence first · explicit unknowns · traceable scoring</span></span>
+  </footer>
+  <a class="back-to-top" href="#top" aria-label="Back to top / 回到顶部"><span aria-hidden="true">↑</span><span class="lang-zh">回到顶部</span><span class="lang-en">Top</span></a>
+
+  <script>
+    (function () {
+      'use strict';
+      var isEnglish = document.documentElement.lang === 'en';
+      var search = document.getElementById('evidence-search');
+      var cards = Array.from(document.querySelectorAll('article.audit-card'));
+      var filters = Array.from(document.querySelectorAll('[data-status-filter]'));
+      var results = document.getElementById('results-line');
+      var noResults = document.getElementById('no-results');
+      var selectedStatus = 'all';
+      var searchable = new Map();
+
+      cards.forEach(function (card) {
+        searchable.set(card, ((card.getAttribute('data-search') || '') + ' ' + card.textContent).toLocaleLowerCase());
+      });
+      search.placeholder = isEnglish ? 'Search claims, files, keywords…' : '搜索主张、文件、关键词…';
+
+      function applyFilters() {
+        var terms = search.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+        var shown = 0;
+        cards.forEach(function (card) {
+          var statusMatches = selectedStatus === 'all' || card.getAttribute('data-status') === selectedStatus;
+          var textMatches = terms.every(function (term) { return searchable.get(card).includes(term); });
+          card.hidden = !(statusMatches && textMatches);
+          if (!card.hidden) shown += 1;
+        });
+        results.textContent = isEnglish ? 'Showing ' + shown + ' of ' + cards.length + ' items' : '显示 ' + shown + ' / ' + cards.length + ' 个条目';
+        noResults.hidden = shown !== 0;
+      }
+
+      filters.forEach(function (button) {
+        button.addEventListener('click', function () {
+          selectedStatus = button.getAttribute('data-status-filter');
+          filters.forEach(function (item) { item.setAttribute('aria-pressed', String(item === button)); });
+          applyFilters();
+        });
+      });
+      search.addEventListener('input', applyFilters);
+
+      document.getElementById('expand-all').addEventListener('click', function () {
+        cards.forEach(function (card) { card.querySelectorAll('details').forEach(function (detail) { detail.open = true; }); });
+      });
+      document.getElementById('collapse-all').addEventListener('click', function () {
+        cards.forEach(function (card) { card.querySelectorAll('details').forEach(function (detail) { detail.open = false; }); });
+      });
+
+      function revealAnchor() {
+        var id;
+        try { id = decodeURIComponent(window.location.hash.slice(1)); } catch (_) { return; }
+        if (!id) return;
+        var target = document.getElementById(id);
+        if (!target) return;
+        var revealed = false;
+        if (target.tagName === 'DETAILS' && !target.open) {
+          target.open = true;
+          revealed = true;
+        }
+        var parent = target.parentElement;
+        while (parent) {
+          if (parent.tagName === 'DETAILS' && !parent.open) {
+            parent.open = true;
+            revealed = true;
+          }
+          parent = parent.parentElement;
+        }
+        var card = target.closest('article.audit-card');
+        if (card) {
+          var evidenceDetail = card.querySelector('details');
+          if (evidenceDetail && !evidenceDetail.open) { evidenceDetail.open = true; revealed = true; }
+        }
+        if (card && card.hidden) {
+          selectedStatus = 'all';
+          search.value = '';
+          filters.forEach(function (item) { item.setAttribute('aria-pressed', String(item.getAttribute('data-status-filter') === 'all')); });
+          applyFilters();
+          revealed = true;
+        }
+        if (revealed) window.requestAnimationFrame(function () { target.scrollIntoView({ block: 'start' }); });
+      }
+      window.addEventListener('hashchange', revealAnchor);
+      applyFilters();
+      revealAnchor();
+
+      var navLinks = Array.from(document.querySelectorAll('.section-nav a'));
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            navLinks.forEach(function (link) {
+              if (link.getAttribute('href') === '#' + entry.target.id) link.setAttribute('aria-current', 'location');
+              else link.removeAttribute('aria-current');
+            });
+          });
+        }, { rootMargin: '-12% 0px -65% 0px', threshold: 0 });
+        document.querySelectorAll('main > section[id]').forEach(function (section) { observer.observe(section); });
+      }
+
+      var printDetails = [];
+      window.addEventListener('beforeprint', function () {
+        printDetails = Array.from(document.querySelectorAll('details')).map(function (detail) { return { element: detail, open: detail.open }; });
+        printDetails.forEach(function (item) { item.element.open = true; });
+      });
+      window.addEventListener('afterprint', function () {
+        printDetails.forEach(function (item) { item.element.open = item.open; });
+        printDetails = [];
+      });
+      document.getElementById('print-report').addEventListener('click', function () { window.print(); });
+    }());
+  </script>
+</body>
+</html>
