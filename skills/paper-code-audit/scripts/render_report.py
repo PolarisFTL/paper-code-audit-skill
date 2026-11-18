@@ -9,6 +9,7 @@ import html
 import json
 from pathlib import Path
 from audit_core import AuditError, read_audit, within, architecture_figure
+from syntax_highlight import highlight_lines
 
 SKILL=Path(__file__).resolve().parent.parent
 
@@ -16,8 +17,20 @@ SKILL=Path(__file__).resolve().parent.parent
 def esc(x):return html.escape(str(x),quote=True)
 
 
+def language_label(path):
+    suffix=Path(path).suffix.lower()
+    return {'.py':'Python','.pyi':'Python','.json':'JSON','.jsonc':'JSONC',
+            '.yaml':'YAML','.yml':'YAML','.c':'C','.h':'C','.cc':'C++','.cpp':'C++',
+            '.cxx':'C++','.hpp':'C++','.js':'JavaScript','.jsx':'JavaScript',
+            '.mjs':'JavaScript','.ts':'TypeScript','.tsx':'TypeScript',
+            '.sh':'Shell','.bash':'Shell','.zsh':'Shell','.toml':'TOML',
+            '.md':'Markdown'}.get(suffix,'Text')
+
+
 def build(audit_path):
     d,inputs,score,source_lines=read_audit(audit_path)
+    # Lex complete files once so snippets preserve multi-line string/comment context.
+    highlighted={path:highlight_lines(path,lines) for path,lines in source_lines.items()}
     zh=d.get('language','zh-CN')=='zh-CN'
     labels=({'matched':'匹配','partial':'部分匹配','mismatched':'不一致','unknown':'未验证',
              'not_applicable':'不适用'} if zh else
@@ -33,7 +46,7 @@ def build(audit_path):
             lines=[]
             for i in indexes:
                 if i is None:lines.append('      … omitted middle lines …')
-                else:lines.append(f'<span class="ln">{i+1:>5}</span> {esc(source_lines[e["path"]][i])}')
+                else:lines.append(f'<span class="ln">{i+1:>5}</span> {highlighted[e["path"]][i]}')
             code_id='code-'+c['id']+'-'+str(index)
             mapping.append('<li><a href="#'+code_id+'"><span class="map-number">'+str(index)+'</span>'+
                            '<span class="map-note">'+esc(e.get('note') or ('对应实现片段' if zh else 'Implementation excerpt'))+
@@ -42,7 +55,8 @@ def build(audit_path):
             ev.append('<div class="evidence" id="'+code_id+'" data-source-path="'+esc(e['path'])+
                       f'" data-start-line="{start}" data-end-line="{end}"><div class="code-title">'+
                       '<span class="excerpt-number">'+str(index)+'</span><code>'+esc(e['path'])+
-                      f'</code><span>L{start}–{end}</span></div><pre><code>'+'\n'.join(lines)+'</code></pre></div>')
+                      '</code><span class="language-badge">'+language_label(e['path'])+'</span>'+
+                      f'<span>L{start}–{end}</span></div><pre><code>'+'\n'.join(lines)+'</code></pre></div>')
         anchor='claim-'+c['id']
         paper_ref=('PDF '+', '.join(str(n) for n in p['pages'])+' · '+p.get('section','')+
                    (' · '+p['equation'] if p.get('equation') else '')).rstrip(' ·')

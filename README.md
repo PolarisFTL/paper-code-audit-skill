@@ -6,6 +6,8 @@ Turn a **paper PDF + source directory or archive** into a readable, offline HTML
 
 The report shows the paper's main network architecture as one crop from the actual PDF, preserving its labels and legend without surrounding paper text. Each evidence item pairs the verdict, paper paraphrase and code mapping on the left with real source excerpts on the right; narrow screens stack the panels. A light/dark switch in the upper-right remembers the reader's choice. Full paper pages are read internally, not embedded in the report.
 
+Source panels use a distinct editor background, file tabs, line numbers and offline VS Code-like syntax colors. Python and common configuration/code formats are highlighted without extra packages; original source characters and evidence hashes remain unchanged.
+
 ## Install
 
 Copy `skills/paper-code-audit` into your Codex skills directory. This package does not require a remote service or API key.
@@ -69,6 +71,7 @@ Six fixed weights: architecture25%, core modules25%, objectives/gradients15%, tr
 - `scripts/record_pdf_metadata.py`: records observed page counts after fallback PDF reading.
 - `scripts/audit_core.py`: evidence validation and deterministic scoring.
 - `scripts/render_report.py` + `assets/report.html`: offline report generation.
+- `scripts/syntax_highlight.py`: dependency-free, escaped lexical highlighting for source excerpts.
 - `references/`: scoring and JSON format.
 - `tests/`: standard-library regression tests.
 
